@@ -46,8 +46,8 @@ def write_grids():
     fp = '{}/matching_grids.txt'.format(pth)
     with open(fp, 'w+') as fd:
         for grid in grids:
-            json.dump(grid, fd)
-            fd.write('\n')
+            lines = [' '.join(line) + '\n' for line in grid]
+            fd.writelines(lines)
 
 def compare_main():
     load_rows()
