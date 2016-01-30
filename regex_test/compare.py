@@ -25,12 +25,49 @@ def load_cols():
             col_matches.append(json.loads(line))
 
 
+def narrow_letters(groups):
+    group_letters = []
+    for item in groups[0]:
+        while len(group_letters) < len(item):
+            group_letters.append(set())
+
+        for lidx, letter in enumerate(item):
+            group_letters[lidx].add(letter)
+
+    return group_letters
+
+
+def reduce_matches(letters, group):
+    new_group = []
+    for idx, items in enumerate(group):
+        possible_letters = letters[idx]
+        new_group.append([])
+        print("Before: ", len(items))
+        for item in items:
+            if item[0] not in possible_letters:
+                continue
+
+            new_group[idx].append(item)
+        print("After: ", len(new_group[idx]))
+
+    return new_group
+
+
+def narrow_choices():
+    global col_matches, row_matches
+
+    col_letters = narrow_letters(col_matches)
+    row_matches = reduce_matches(col_letters, row_matches)
+
+    row_letters = narrow_letters(row_matches)
+    col_matches = reduce_matches(row_letters, col_matches)
+    
+
 def compare_cols_to_rows():
     global col_matches, grids, row_matches
     
     one, two, three, four = col_matches
-    one = [r for r in one if r[0] == 'R']  # I happen to know that this column starts with R
-    
+      
     for r1 in one:
         for r2 in two:
             for r3 in three:
@@ -39,6 +76,7 @@ def compare_cols_to_rows():
                     grid = [''.join(row) in row_matches[idx] for idx, row in enumerate(rows)]
                     if all(grid): 
                         grids.append(rows)
+
 
 def write_grids():
     global grids
@@ -49,9 +87,11 @@ def write_grids():
             lines = [' '.join(line) + '\n' for line in grid]
             fd.writelines(lines)
 
+
 def compare_main():
     load_rows()
     load_cols()
+    narrow_choices()
     compare_cols_to_rows()
     write_grids()
 
